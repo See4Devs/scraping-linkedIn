@@ -1,5 +1,6 @@
 import asyncio
 from playwright.async_api import async_playwright
+from bs4 import BeautifulSoup
 
 username='YOUR_BRIGHTDATA_USERNAME'
 password='YOUR_BRIGHTDATA_PASSWORD'
@@ -16,22 +17,24 @@ async def main():
         print('goto')
         await page.goto('https://www.linkedin.com/company/spacex/', timeout=120000)
         print('done, evaluating')
-
-        # Wait for the 'About us' section to be visible before extracting content
-        await page.wait_for_selector('.core-section-container[data-test-id="about-us"]')
+        
+        # Get the entire HTML content
+        html_content = await page.evaluate('()=>document.documentElement.outerHTML')
+        
+        # Parse the HTML with Beautiful Soup
+        soup = BeautifulSoup(html_content, 'html.parser')
 
         # Extract the 'About us' description
-        description_element = await page.query_selector('.core-section-container[data-test-id="about-us"] p[data-test-id="about-us__description"]')
-        description = await description_element.inner_text()
+        description_element = soup.select_one('.core-section-container[data-test-id="about-us"] p[data-test-id="about-us__description"]')
+        description = description_element.text if description_element else None
         print('Description:')
         print(description)
 
-        # Extract the 'Company size' (with error handling)
-        company_size_element = await page.query_selector('div[data-test-id="about-us__size"] dd')
-        company_size = await company_size_element.inner_text() if company_size_element else None
-        if company_size:
-            print('Company size:')
-            print(company_size)
+        # Extract the 'Company size'
+        company_size_element = soup.select_one('div[data-test-id="about-us__size"] dd')
+        company_size = company_size_element.text.strip() if company_size_element else None
+        print('Company size:')
+        print(company_size)
 
         await browser.close()
 
