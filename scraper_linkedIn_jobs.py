@@ -9,13 +9,8 @@ if response.status_code == 200:
         title = job.find('h3', {'class': 'base-search-card__title'}).text.strip()
         company = job.find('a', {'class': 'hidden-nested-link'}).text.strip()
         location = job.find('span', {'class': 'job-search-card__location'}).text.strip()
-        # Find the anchor tag containing the link
-        anchor_tag = soup.find('a', class_='base-card__full-link')
-        # Extract the 'href' attribute value
-        if anchor_tag:
-            href_link = anchor_tag['href']
-        else:
-            print("Anchor tag not found.")
+        anchor_tag = job.find('a', class_='base-card__full-link')
+        href_link = anchor_tag['href']
         print(f"Title: {title}\nCompany: {company}\nLocation: {location}\nJob Link: {href_link}\n")
 else:
     print("Failed to fetch job listings.")
